@@ -42,8 +42,8 @@ def extract_values(text):
     return results
 
 if uploaded_file:
-    image_prewiew = Image.open(uploaded_file).convert("RGB")
-    st.image(image_preview, caption="Uploaded Report", use_container_width=True)
+    image_preview = Image.open(uploaded_file).convert("RGB")
+    st.image_preview(image, caption="Uploaded Report", use_container_width=True)
 
     image = preprocess_image(Image.open(uploaded_file))
 
