@@ -43,7 +43,10 @@ if uploaded_file:
     st.image(image, caption="Uploaded Report", use_container_width=True)
 
     with st.spinner("🔍 Running layout-aware OCR..."):
-        doc = DocumentFile.from_images(image)
+        #doc = DocumentFile.from_images(image)
+        img_np = np.array(image)
+        doc = DocumentFile.from_images([img_np])
+
         model = load_model()
         result = model(doc)
 
