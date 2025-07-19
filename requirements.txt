@@ -1,6 +1,6 @@
 streamlit
+torch
 pillow
 pandas
-python-doctr[torch]
-opencv-python-headless
-
+opencv-python
+git+https://github.com/ibm/multimodal-table-detection.git@main
