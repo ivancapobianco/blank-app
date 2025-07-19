@@ -41,6 +41,7 @@ def extract_values(text):
                 continue
     return results
 
+    
 if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Uploaded Report", use_container_width=True)
@@ -50,6 +51,8 @@ if uploaded_file:
     
     with st.spinner("📖 Extracting values..."):
         text = pytesseract.image_to_string(image, lang="eng+ita")
+        st.subheader("📝 Raw OCR Text")
+        st.text_area("Recognized Text", text, height=200)
         data = extract_values(text)
 
     if data:
