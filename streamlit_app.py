@@ -42,7 +42,9 @@ def extract_values(text):
     return results
 
 if uploaded_file:
-    image = Image.open(uploaded_file).convert("RGB")
+    #image = Image.open(uploaded_file).convert("RGB")
+    image = preprocess_image(Image.open(uploaded_file))
+
     st.image(image, caption="Uploaded Report", use_container_width=True)
 
     with st.spinner("📖 Extracting values..."):
