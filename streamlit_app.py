@@ -42,9 +42,11 @@ if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Uploaded Report", use_container_width=True)
 
+    st.write(f"Image type: {type(image)}")
+
     with st.spinner("🔍 Running layout-aware OCR..."):
         #doc = DocumentFile.from_images(image)
-        st.write(f"Image type: {type(image)}")
+        
 
         doc = DocumentFile.from_images([image])
 
