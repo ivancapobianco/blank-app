@@ -2,5 +2,3 @@ streamlit
 pillow
 pytesseract
 pandas
-opencv-python-headless
-layoutparser[layoutmodels,tesseract]
