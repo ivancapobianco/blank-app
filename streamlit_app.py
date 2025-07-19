@@ -9,7 +9,7 @@ from doctr.io import DocumentFile
 from doctr.models import ocr_predictor
 
 st.set_page_config(page_title="Extract Report", layout="centered")
-st.title("🧪 Smart Blood Report Extraction (with DocTR)")
+st.title("🧪 Smart Blood Report Extraction (with DocTR)!!")
 
 st.markdown("Upload or photograph a lab report: the app will extract **Test Name**, **Value**, and **Unit of Measure** using deep learning-based OCR.")
 
