@@ -40,7 +40,7 @@ def extract_values(text):
 
 if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Report", use_column_width=True)
+    st.image(image, caption="Uploaded Report", use_container_width=True)
 
     with st.spinner("📖 Extracting values..."):
         text = pytesseract.image_to_string(image, lang="eng+ita")
