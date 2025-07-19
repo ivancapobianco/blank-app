@@ -44,7 +44,7 @@ if uploaded_file:
 
     with st.spinner("🔍 Running layout-aware OCR..."):
         #doc = DocumentFile.from_images(image)
-        img_np = np.array(image)
+        img_np = np.array(image).astype("uint8")  # ensure uint8 format
         doc = DocumentFile.from_images([img_np])
 
         model = load_model()
