@@ -1,19 +1,19 @@
 import streamlit as st
 from PIL import Image
 import pandas as pd
-import numpy as np
 import re
-import cv2
+import tempfile
 
 import doctr
-
 from doctr.io import DocumentFile
 from doctr.models import ocr_predictor
 
 st.set_page_config(page_title="Extract Report", layout="centered")
 st.title("🧪 Smart Blood Report Extraction (with DocTR)")
 
-st.markdown("Upload or photograph a lab report: the app will extract **Test Name**, **Value**, and **Unit of Measure** using deep learning-based OCR.")
+st.markdown(
+    "Upload or photograph a lab report: the app will extract **Test Name**, **Value**, and **Unit of Measure** using deep learning-based OCR."
+)
 
 uploaded_file = st.file_uploader("📷 Upload image (JPG/PNG)", type=["jpg", "jpeg", "png"])
 
@@ -46,31 +46,33 @@ if uploaded_file:
 
     st.write(f"DocTR version: {doctr.__version__}")
 
-    with st.spinner("🔍 Running layout-aware OCR..."):
-        #doc = DocumentFile.from_images(image)
-        
+    with tempfile.NamedTemporaryFile(suffix=".png") as tmp:
+        # Save uploaded image to temp file
+        image.save(tmp.name)
 
-        doc = DocumentFile.from_images([image])
+        with st.spinner("🔍 Running layout-aware OCR..."):
+            doc = DocumentFile.from_images([tmp.name])
 
+            model = load_model()
+            result = model(doc)
 
-        model = load_model()
-        result = model(doc)
+            # Extract lines from prediction
+            lines = []
+            for page in result.pages:
+                for block in page.blocks:
+                    for line in block.lines:
+                        text = " ".join(word.value for word in line.words)
+                        lines.append(text)
 
-        # Extract lines from prediction
-        lines = []
-        for page in result.pages:
-            for block in page.blocks:
-                for line in block.lines:
-                    text = " ".join(word.value for word in line.words)
-                    lines.append(text)
-
-        parsed = parse_lines_to_values(lines)
+            parsed = parse_lines_to_values(lines)
 
     if parsed:
         df = pd.DataFrame(parsed)
         st.success("✅ Values extracted successfully")
         st.dataframe(df)
-        csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download CSV", data=csv, file_name="lab_report_values.csv", mime="text/csv")
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "📥 Download CSV", data=csv, file_name="lab_report_values.csv", mime="text/csv"
+        )
     else:
         st.warning("⚠️ No values recognized.")
