@@ -1,6 +1,6 @@
 streamlit
 pillow
-pytesseract
 pandas
-numpy
+python-doctr[torch]
 opencv-python-headless
+
