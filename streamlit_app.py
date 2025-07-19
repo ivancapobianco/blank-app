@@ -4,6 +4,7 @@ import pytesseract
 import pandas as pd
 import numpy as np
 import cv2
+import re  # ← Add this line
 
 st.set_page_config(page_title="Extract Lab Report", layout="centered")
 st.title("🧪 Smart Lab Value Extraction")
