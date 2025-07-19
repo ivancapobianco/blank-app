@@ -1,6 +1,6 @@
 streamlit
 pillow
+pytesseract
 pandas
-opencv-python
+opencv-python-headless
 layoutparser[layoutmodels,tesseract]
-paddleocr
