@@ -14,6 +14,33 @@ def preprocess_image(pil_image):
     _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return Image.fromarray(img)
 
+
+def preprocess_image(pil_image):
+    # Convert to grayscale
+    img = np.array(pil_image.convert("L"))
+
+    # Optional: Crop borders (removes scanner shadows)
+    img = cv2.copyMakeBorder(img, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=255)
+
+    # Resize for better OCR resolution
+    img = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+
+    # Adaptive thresholding handles uneven lighting better
+    img = cv2.adaptiveThreshold(
+        img, 255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        blockSize=11,
+        C=2
+    )
+
+    # Optional: Morphological operations to clean noise
+    kernel = np.ones((1, 1), np.uint8)
+    img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+
+    return Image.fromarray(img)
+
+
 st.set_page_config(page_title="Extract Report", layout="centered")
 st.title("🧪 Automatic Extraction of Values from Blood Test Reports")
 
