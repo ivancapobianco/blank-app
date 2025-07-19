@@ -4,6 +4,17 @@ import pytesseract
 import pandas as pd
 import re
 
+import cv2
+import numpy as np
+
+def preprocess_image(pil_image):
+    img = np.array(pil_image.convert("L"))  # Convert to grayscale
+    img = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    img = cv2.GaussianBlur(img, (5, 5), 0)
+    _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return Image.fromarray(img)
+    
+
 st.set_page_config(page_title="Estrai Referto", layout="centered")
 st.title("🧪 Estrazione automatica di valori da referti ematici")
 
@@ -32,7 +43,8 @@ def estrai_valori(testo):
     return risultati
 
 if uploaded_file:
-    image = Image.open(uploaded_file).convert("RGB")
+    #image = Image.open(uploaded_file).convert("RGB")
+    image = preprocess_image(Image.open(uploaded_file))
     st.image(image, caption="Referto caricato", use_column_width=True)
 
     with st.spinner("📖 Estrazione in corso..."):
