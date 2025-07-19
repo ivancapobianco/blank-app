@@ -42,11 +42,12 @@ def extract_values(text):
     return results
 
 if uploaded_file:
-    #image = Image.open(uploaded_file).convert("RGB")
+    image_prewiew = Image.open(uploaded_file).convert("RGB")
+    st.image(image_preview, caption="Uploaded Report", use_container_width=True)
+
     image = preprocess_image(Image.open(uploaded_file))
 
-    st.image(image, caption="Uploaded Report", use_container_width=True)
-
+    
     with st.spinner("📖 Extracting values..."):
         text = pytesseract.image_to_string(image, lang="eng+ita")
         data = extract_values(text)
