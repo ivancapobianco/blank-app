@@ -44,6 +44,8 @@ if uploaded_file:
 
     with st.spinner("🔍 Running layout-aware OCR..."):
         #doc = DocumentFile.from_images(image)
+        st.write(f"Image type: {type(image)}")
+
         doc = DocumentFile.from_images([image])
 
 
