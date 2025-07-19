@@ -46,7 +46,7 @@ if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Uploaded Report", use_container_width=True)
 
-    image = preprocess_image(Image.open(uploaded_file))
+    #image = preprocess_image(Image.open(uploaded_file))
 
     
     with st.spinner("📖 Extracting values..."):
