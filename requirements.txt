@@ -1,6 +1,6 @@
 streamlit
-torch
 pillow
 pandas
 opencv-python
-git+https://github.com/ibm/multimodal-table-detection.git@main
+layoutparser[layoutmodels,tesseract]
+paddleocr
