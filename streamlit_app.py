@@ -48,7 +48,7 @@ if uploaded_file:
     st.image(image, caption="Uploaded Report", use_container_width=True)
 
     with st.spinner("📖 Extracting values..."):
-        text = pytesseract.image_to_string(image, lang="eng+ita")
+        text = pytesseract.image_to_data(image, lang="eng+ita") #image_to_string
         data = extract_values(text)
 
     if data:
