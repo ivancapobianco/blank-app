@@ -5,6 +5,8 @@ import numpy as np
 import re
 import cv2
 
+import doctr
+
 from doctr.io import DocumentFile
 from doctr.models import ocr_predictor
 
