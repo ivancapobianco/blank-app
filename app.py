@@ -16,7 +16,7 @@ def preprocess_image(pil_image):
     
 
 st.set_page_config(page_title="Estrai Referto", layout="centered")
-st.title("🧪 Estrazione automatica di valori da referti ematici")
+st.title("🧪 Estrazione automatica di valori da referti ematici!!")
 
 st.markdown("Carica o fotografa un referto: l'app estrarrà **Test**, **Valore** e **Unità di misura**.")
 
