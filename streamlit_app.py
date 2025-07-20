@@ -119,7 +119,14 @@ with col2:
                     image_path=temp_path,
                     format_type="markdown",  # Options: markdown, text, json, structured, key_value
                     #language="eng",
-                    #custom_prompt="Extract all the text. Do not remove or add anything."
+                    custom_prompt="""Using default prompt: Extract all blood count values content from this image in en **exactly as it appears**, without modification, summarization, or omission.
+                                Format the output in markdown:
+                                - output always test name, value and unit (if present)
+                                - Use headers (#, ##, ###) **only if they appear in the image**
+                                - Preserve original lists (-, *, numbered lists) as they are
+                                - Maintain all text formatting (bold, italics, underlines) exactly as seen
+                                - **Do not add, interpret, or restructure any content**
+"""
                 )
 
                 print('#####################')
