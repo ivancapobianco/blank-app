@@ -1,3 +1,5 @@
+#in terminal: streamlit run streamlit_app.py
+
 import streamlit as st
 from PIL import Image
 import io
@@ -8,6 +10,7 @@ import tempfile
 
 import cv2
 import numpy as np
+import pandas as pd
 
 def preprocess_image(pil_image):
     img = np.array(pil_image.convert("L"))  # Convert to grayscale
@@ -17,11 +20,9 @@ def preprocess_image(pil_image):
     return Image.fromarray(img)
 
 # Page configuration
-st.set_page_config(
-    page_title="Gemma OCR Assistant",
-    page_icon="🔍",
-    layout="wide"
-)
+
+st.set_page_config(page_title="Extract Report", layout="centered")
+st.title("🧪 Automatic Extraction of Values from Blood Test Reports")
 
 # Custom CSS
 st.markdown("""
@@ -47,99 +48,101 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Initialize Ollama client
-@st.cache_resource
-def get_ollama_client():
-    return OllamaClient()
+st.markdown(
+    "Upload or photograph a lab report: the app will extract **Test Name**, **Value**, and **Unit of Measure**.")
 
-client = get_ollama_client()
+uploaded_file = st.file_uploader("📷 Upload image (JPG/PNG)", type=["jpg", "jpeg", "png"])
 
-# Header
-st.title("🔍 Gemma OCR Assistant")
-st.markdown("""
-This application uses Gemma 3B's multimodal capabilities to analyze images and extract text.
-Upload an image and optionally provide a custom prompt to guide the analysis.
-""")
 
-# Sidebar with instructions
-with st.sidebar:
-    st.header("📝 Instructions")
-    st.markdown("""
-    1. Upload an image containing text
-    2. (Optional) Provide a custom prompt
-    3. Click 'Analyze Image' to process
-    
-    **Example Prompts:**
-    - Extract and list all text from the image
-    - Describe the layout and formatting of text
-    - Analyze the context and meaning of the text
-    """)
+# def extract_values(text):
+#     lines = text.split("\n")
+#     results = []
+#     pattern = r"([A-Za-z0-9 #\(\)/%µ\^\-]+?)\s+([\d.,]+)\s*([a-zA-Z/µ^%³]+)?"
+#
+#     for line in lines:
+#         match = re.match(pattern, line.strip())
+#         if match:
+#             test, value, unit = match.groups()
+#             try:
+#                 value_float = float(value.replace(",", "."))
+#                 results.append({
+#                     "Test": test.strip(),
+#                     "Value": value_float,
+#                     "Unit": unit or ""
+#                 })
+#             except:
+#                 continue
+#     return results
 
-# Main content
-col1, col2 = st.columns([1, 1])
 
-with col1:
-    st.subheader("Image Upload")
-    uploaded_file = st.file_uploader("Choose an image file", type=["png", "jpg", "jpeg"])
-    
+if uploaded_file:
+    try:
+        image = Image.open(uploaded_file).convert("RGB")
+        st.image(image, caption="Uploaded Report", use_column_width=True)# use_container_width=True)
+        image = preprocess_image(Image.open(uploaded_file))
+
+
+    except Exception as e:
+        st.error(f"Error loading image: {str(e)}")
+        image = None
+
     if uploaded_file is not None:
-        try:
-            image = Image.open(uploaded_file)
 
-            image = preprocess_image(Image.open(uploaded_file))
+        custom_prompt = st.text_area(
+            "Custom Prompt (optional)",
+            placeholder="Enter a custom prompt to guide the analysis...",
+            help="Leave empty to use the default prompt for general text extraction and analysis."
+        )
 
-            st.image(image, caption="Uploaded Image", use_column_width=True)
-        except Exception as e:
-            st.error(f"Error loading image: {str(e)}")
-            image = None
-    
-    custom_prompt = st.text_area(
-        "Custom Prompt (optional)",
-        placeholder="Enter a custom prompt to guide the analysis...",
-        help="Leave empty to use the default prompt for general text extraction and analysis."
-    )
+        lab_prompt = """Using default prompt: Extract all blood count values content from this image in en **exactly as it appears**, without modification, summarization, or omission.
+                                                Format the output in markdown:
+                                                - output always test name, value and unit (if present)
+                                                - Use headers (#, ##, ###) **only if they appear in the image**
+                                                - Preserve original lists (-, *, numbered lists) as they are
+                                                - Maintain all text formatting (bold, italics, underlines) exactly as seen
+                                                - **Do not add, interpret, or restructure any content**
+                """
 
-with col2:
-    st.subheader("Analysis Results")
-    if uploaded_file is not None and st.button("Analyze Image"):
-        with st.spinner("Processing image..."):
-            try:
-                #result = client.analyze_image(image, custom_prompt)
+        if st.button("Analyze Image"):
 
-                ##### TEST
-                # Save uploaded PIL image to a temp file
-                with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-                    image.save(tmp.name)
-                    temp_path = tmp.name
+            with st.spinner("📖 Extracting values..."):
 
+                try:
 
-                ocr = OCRProcessor(model_name="llama3.2-vision:11b") #llama3.2-vision:11b #gemma3:4b
+                    # Save uploaded PIL image to a temp file
+                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                        image.save(tmp.name)
+                        temp_path = tmp.name
 
-                result = ocr.process_image(
-                    image_path=temp_path,
-                    format_type="markdown",  # Options: markdown, text, json, structured, key_value
-                    #language="eng",
-                    custom_prompt="""Using default prompt: Extract all blood count values content from this image in en **exactly as it appears**, without modification, summarization, or omission.
-                                Format the output in markdown:
-                                - output always test name, value and unit (if present)
-                                - Use headers (#, ##, ###) **only if they appear in the image**
-                                - Preserve original lists (-, *, numbered lists) as they are
-                                - Maintain all text formatting (bold, italics, underlines) exactly as seen
-                                - **Do not add, interpret, or restructure any content**
-"""
-                )
+                    ocr = OCRProcessor(model_name="gemma3:4b")  # llama3.2-vision:11b #gemma3:4b
 
-                print('#####################')
-                print(result)
+                    result = ocr.process_image(
+                        image_path=temp_path,
+                        format_type="markdown",  # Options: markdown, text, json, structured, key_value
+                        # language="eng",
+                        #custom_prompt=lab_prompt
+                    )
 
-                ####
+                    print('#####################')
+                    print(result)
 
+                    st.subheader("📝 Results:")
+                    st.text_area("Recognized Text", result, height=200)
 
-                st.markdown("### Results:")
-                st.write(result)
-            except Exception as e:
-                st.error(f"Error during analysis: {str(e)}")
+                    data = extract_values(result)
+
+                    if data:
+                        df = pd.DataFrame(data)
+                        st.success("✅ Values extracted successfully")
+                        st.dataframe(df)
+                        csv = df.to_csv(index=False).encode('utf-8')
+                        st.download_button("📥 Download as CSV", data=csv, file_name="lab_report_values.csv", mime="text/csv")
+                    else:
+                        st.warning("No values were recognized.")
+
+                except Exception as e:
+                    st.error(f"Error during analysis: {str(e)}")
 
 # Footer
 st.markdown("---")
-st.markdown("*Powered by Gemma 3B and Ollama*") 
+st.markdown("*Powered by Breeflee and Ollama*")
