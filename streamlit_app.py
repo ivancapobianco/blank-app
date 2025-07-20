@@ -16,6 +16,8 @@ import pandas as pd
 
 import re
 
+#help(OCRProcessor.process_image)
+
 def preprocess_image(pil_image):
     img = np.array(pil_image.convert("L"))  # Convert to grayscale
     img = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
@@ -79,27 +81,6 @@ st.markdown(
 uploaded_file = st.file_uploader("📷 Upload image (JPG/PNG)", type=["jpg", "jpeg", "png"])
 
 
-# def extract_values(text):
-#     lines = text.split("\n")
-#     results = []
-#     pattern = r"([A-Za-z0-9 #\(\)/%µ\^\-]+?)\s+([\d.,]+)\s*([a-zA-Z/µ^%³]+)?"
-#
-#     for line in lines:
-#         match = re.match(pattern, line.strip())
-#         if match:
-#             test, value, unit = match.groups()
-#             try:
-#                 value_float = float(value.replace(",", "."))
-#                 results.append({
-#                     "Test": test.strip(),
-#                     "Value": value_float,
-#                     "Unit": unit or ""
-#                 })
-#             except:
-#                 continue
-#     return results
-
-
 if uploaded_file:
     try:
         image = Image.open(uploaded_file).convert("RGB")
@@ -119,7 +100,7 @@ if uploaded_file:
                                  index=0 #Default selected
                                  )
 
-        if prompt_choice == "Default Prompt":
+        if prompt_choice == "Custom Prompt":
 
             custom_prompt = st.text_area(
                 "Custom Prompt (optional)",
@@ -153,18 +134,16 @@ if uploaded_file:
                     if prompt_choice != "Ollama-OCR Default Prompt":
                         prompt = custom_prompt
 
-                        result = ocr.process_image(
-                            image_path=temp_path,
-                            format_type="markdown",  # Options: markdown, text, json, structured, key_value
-                            # language="eng",
-                            custom_prompt=prompt  # lab_prompt #prompt
-                        )
                     else:
-                        result = ocr.process_image(
+                        prompt = None
+
+
+                    result = ocr.process_image(
                             image_path=temp_path,
                             preprocess=True,
                             format_type="markdown",  # Options: markdown, text, json, structured, key_value
-                            # language="eng",
+                            # language="en",
+                            custom_prompt=prompt
                         )
 
                     print('#####################')
