@@ -3,6 +3,9 @@ from PIL import Image
 import io
 from ollama_utils import OllamaClient
 
+from ollama_ocr import OCRProcessor
+import tempfile
+
 # Page configuration
 st.set_page_config(
     page_title="Gemma OCR Assistant",
@@ -88,7 +91,30 @@ with col2:
     if uploaded_file is not None and st.button("Analyze Image"):
         with st.spinner("Processing image..."):
             try:
-                result = client.analyze_image(image, custom_prompt)
+                #result = client.analyze_image(image, custom_prompt)
+
+                ##### TEST
+                # Save uploaded PIL image to a temp file
+                with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                    image.save(tmp.name)
+                    temp_path = tmp.name
+
+
+                ocr = OCRProcessor(model_name="llama3.2-vision:11b")
+
+                result = ocr.process_image(
+                    image_path=temp_path,
+                    format_type="text",  # Options: markdown, text, json, structured, key_value
+                    #language="eng",
+                    #custom_prompt="Extract the text."
+                )
+
+                print('#####################')
+                print(result)
+
+                ####
+
+
                 st.markdown("### Results:")
                 st.write(result)
             except Exception as e:
