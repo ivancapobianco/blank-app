@@ -85,8 +85,8 @@ if uploaded_file:
     try:
         image = Image.open(uploaded_file).convert("RGB")
         st.image(image, caption="Uploaded Report", use_container_width=True)# use_container_width=True)
-        #image = preprocess_image(Image.open(uploaded_file))
-        #st.image(image, caption="Uploaded Report", use_container_width=True)  # use_container_width=True)
+        image = preprocess_image(Image.open(uploaded_file))
+        st.image(image, caption="Uploaded Report", use_container_width=True)  # use_container_width=True)
 
 
     except Exception as e:
