@@ -19,6 +19,27 @@ def preprocess_image(pil_image):
     _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return Image.fromarray(img)
 
+
+def extract_values(text):
+    lines = text.split("\n")
+    results = []
+    pattern = r"([A-Za-z0-9 #\(\)/%µ\^\-]+?)\s+([\d.,]+)\s*([a-zA-Z/µ^%³]+)?"
+
+    for line in lines:
+        match = re.match(pattern, line.strip())
+        if match:
+            test, value, unit = match.groups()
+            try:
+                value_float = float(value.replace(",", "."))
+                results.append({
+                    "Test": test.strip(),
+                    "Value": value_float,
+                    "Unit": unit or ""
+                })
+            except:
+                continue
+    return results
+
 # Page configuration
 
 st.set_page_config(page_title="Extract Report", layout="centered")
