@@ -6,6 +6,16 @@ from ollama_utils import OllamaClient
 from ollama_ocr import OCRProcessor
 import tempfile
 
+import cv2
+import numpy as np
+
+def preprocess_image(pil_image):
+    img = np.array(pil_image.convert("L"))  # Convert to grayscale
+    img = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    img = cv2.GaussianBlur(img, (5, 5), 0)
+    _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return Image.fromarray(img)
+
 # Page configuration
 st.set_page_config(
     page_title="Gemma OCR Assistant",
@@ -75,6 +85,9 @@ with col1:
     if uploaded_file is not None:
         try:
             image = Image.open(uploaded_file)
+
+            image = preprocess_image(Image.open(uploaded_file))
+
             st.image(image, caption="Uploaded Image", use_column_width=True)
         except Exception as e:
             st.error(f"Error loading image: {str(e)}")
