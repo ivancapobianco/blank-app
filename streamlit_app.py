@@ -100,11 +100,11 @@ with col2:
                     temp_path = tmp.name
 
 
-                ocr = OCRProcessor(model_name="llama3.2-vision:11b")
+                ocr = OCRProcessor(model_name="gemma3:4b") #llama3.2-vision:11b #gemma3:4b
 
                 result = ocr.process_image(
                     image_path=temp_path,
-                    format_type="text",  # Options: markdown, text, json, structured, key_value
+                    format_type="markdown",  # Options: markdown, text, json, structured, key_value
                     #language="eng",
                     #custom_prompt="Extract the text."
                 )
