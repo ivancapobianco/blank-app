@@ -106,7 +106,7 @@ with col2:
                     image_path=temp_path,
                     format_type="markdown",  # Options: markdown, text, json, structured, key_value
                     #language="eng",
-                    #custom_prompt="Extract the text."
+                    custom_prompt="Extract all the text. Do not remove or add anything."
                 )
 
                 print('#####################')
