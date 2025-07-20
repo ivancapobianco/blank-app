@@ -16,6 +16,17 @@ import pandas as pd
 
 import re
 
+import requests
+
+def get_installed_ollama_models(base_url="http://localhost:11434"):
+    try:
+        response = requests.get(f"{base_url}/api/tags")
+        response.raise_for_status()
+        models = response.json().get("models", [])
+        return [model["name"] for model in models]
+    except Exception as e:
+        return [f"Errore: {str(e)}"]
+
 #help(OCRProcessor.process_image)
 
 def preprocess_image(pil_image):
@@ -118,6 +129,12 @@ if uploaded_file:
             - **Do not add, interpret, or restructure any content**
                 """
 
+        st.title("🔍 Select an Ollama Model")
+        model_list = get_installed_ollama_models()
+        selected_model = st.selectbox("Available Models:", model_list)
+        st.write(f"You selected the model: `{selected_model}`")
+
+
         if st.button("Analyze Image"):
 
             with st.spinner("📖 Extracting values..."):
@@ -129,7 +146,7 @@ if uploaded_file:
                         image.save(tmp.name)
                         temp_path = tmp.name
 
-                    ocr = OCRProcessor(model_name="llama3.2-vision:11b")  # llama3.2-vision:11b #gemma3:4b
+                    ocr = OCRProcessor(model_name=selected_model)  # llama3.2-vision:11b #gemma3:4b
 
                     if prompt_choice != "Ollama-OCR Default Prompt":
                         prompt = custom_prompt
