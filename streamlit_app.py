@@ -3,6 +3,8 @@
 import streamlit as st
 from PIL import Image
 import io
+
+from app_temp import custom_prompt
 from ollama_utils import OllamaClient
 
 from ollama_ocr import OCRProcessor
@@ -11,6 +13,8 @@ import tempfile
 import cv2
 import numpy as np
 import pandas as pd
+
+import re
 
 def preprocess_image(pil_image):
     img = np.array(pil_image.convert("L"))  # Convert to grayscale
@@ -99,8 +103,9 @@ uploaded_file = st.file_uploader("📷 Upload image (JPG/PNG)", type=["jpg", "jp
 if uploaded_file:
     try:
         image = Image.open(uploaded_file).convert("RGB")
-        st.image(image, caption="Uploaded Report", use_column_width=True)# use_container_width=True)
-        image = preprocess_image(Image.open(uploaded_file))
+        st.image(image, caption="Uploaded Report", use_container_width=True)# use_container_width=True)
+        #image = preprocess_image(Image.open(uploaded_file))
+        #st.image(image, caption="Uploaded Report", use_container_width=True)  # use_container_width=True)
 
 
     except Exception as e:
@@ -109,19 +114,27 @@ if uploaded_file:
 
     if uploaded_file is not None:
 
-        custom_prompt = st.text_area(
-            "Custom Prompt (optional)",
-            placeholder="Enter a custom prompt to guide the analysis...",
-            help="Leave empty to use the default prompt for general text extraction and analysis."
-        )
+        prompt_choice = st.radio("Choose a prompt type:",
+                                 ["Ollama-OCR Default Prompt", "Lab Prompt", "Custom Prompt"],
+                                 index=0 #Default selected
+                                 )
 
-        lab_prompt = """Using default prompt: Extract all blood count values content from this image in en **exactly as it appears**, without modification, summarization, or omission.
-                                                Format the output in markdown:
-                                                - output always test name, value and unit (if present)
-                                                - Use headers (#, ##, ###) **only if they appear in the image**
-                                                - Preserve original lists (-, *, numbered lists) as they are
-                                                - Maintain all text formatting (bold, italics, underlines) exactly as seen
-                                                - **Do not add, interpret, or restructure any content**
+        if prompt_choice == "Default Prompt":
+
+            custom_prompt = st.text_area(
+                "Custom Prompt (optional)",
+                placeholder="Enter a custom prompt to guide the analysis...",
+                help="Leave empty to use the default prompt for general text extraction and analysis."
+            )
+
+        elif prompt_choice == "Lab Prompt":
+            custom_prompt = """Using default prompt: Extract all blood count values content from this image in en **exactly as it appears**, without modification, summarization, or omission.
+            Format the output in markdown:
+            - output always test name, value and unit (if present)
+            - Use headers (#, ##, ###) **only if they appear in the image**
+            - Preserve original lists (-, *, numbered lists) as they are
+            - Maintain all text formatting (bold, italics, underlines) exactly as seen
+            - **Do not add, interpret, or restructure any content**
                 """
 
         if st.button("Analyze Image"):
@@ -135,14 +148,24 @@ if uploaded_file:
                         image.save(tmp.name)
                         temp_path = tmp.name
 
-                    ocr = OCRProcessor(model_name="gemma3:4b")  # llama3.2-vision:11b #gemma3:4b
+                    ocr = OCRProcessor(model_name="llama3.2-vision:11b")  # llama3.2-vision:11b #gemma3:4b
 
-                    result = ocr.process_image(
-                        image_path=temp_path,
-                        format_type="markdown",  # Options: markdown, text, json, structured, key_value
-                        # language="eng",
-                        #custom_prompt=lab_prompt
-                    )
+                    if prompt_choice != "Ollama-OCR Default Prompt":
+                        prompt = custom_prompt
+
+                        result = ocr.process_image(
+                            image_path=temp_path,
+                            format_type="markdown",  # Options: markdown, text, json, structured, key_value
+                            # language="eng",
+                            custom_prompt=prompt  # lab_prompt #prompt
+                        )
+                    else:
+                        result = ocr.process_image(
+                            image_path=temp_path,
+                            preprocess=True,
+                            format_type="markdown",  # Options: markdown, text, json, structured, key_value
+                            # language="eng",
+                        )
 
                     print('#####################')
                     print(result)
