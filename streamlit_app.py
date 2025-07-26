@@ -4,7 +4,6 @@ import streamlit as st
 from PIL import Image
 import io
 
-from app_temp import custom_prompt
 from ollama_utils import OllamaClient
 
 from ollama_ocr import OCRProcessor
@@ -120,9 +119,9 @@ if uploaded_file:
             )
 
         elif prompt_choice == "Lab Prompt":
-            custom_prompt = """Using default prompt: Extract all blood count values content from this image in en **exactly as it appears**, without modification, summarization, or omission.
-            Format the output in markdown:
-            - output always test name, value and unit (if present)
+            custom_prompt = """Using default prompt: Extract all blood count values content from this image **exactly as it appears**, without modification, summarization, or omission.
+            Format the output in markdown table:
+            - output always a table with columns test name, value and unit
             - Use headers (#, ##, ###) **only if they appear in the image**
             - Preserve original lists (-, *, numbered lists) as they are
             - Maintain all text formatting (bold, italics, underlines) exactly as seen
@@ -157,7 +156,7 @@ if uploaded_file:
 
                     result = ocr.process_image(
                             image_path=temp_path,
-                            preprocess=True,
+                            preprocess=False,
                             format_type="markdown",  # Options: markdown, text, json, structured, key_value
                             # language="en",
                             custom_prompt=prompt
